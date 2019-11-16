@@ -2,6 +2,7 @@ import pytest
 
 from src.bm import Bm
 
+
 @pytest.mark.parametrize("text,pattern,expected", [
     ("GCTCACTGAGCGCTCGT", "GCTCG", 11),
     ("GCTCACTGAGCGCTCGT", "CACTGAG", 3),
