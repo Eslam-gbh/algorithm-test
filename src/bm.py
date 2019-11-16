@@ -13,24 +13,41 @@ class Bm(object):
         self.text = text
         self.pattern = pattern
         self.table = make_km_table(pattern)
+        self.pattern_length = len(pattern)
+        self.text_length = len(text)
 
-    def decide_slide_width(self, c: str) -> int:
-        assert len(c) == 1
-        return self.table.get(c, -1)
+    def decide_slide_width(self, pat_index: int, char: str) -> int:
+        assert len(char) == 1
+        slide_width = pat_index - self.table.get(char, -1)
+        return max(1, slide_width)
+
+    def _calculate_text_pattern_difference(self) -> int:
+        return (self.text_length - self.pattern_length + 1)
+
+    def _get_index_of_the_first_text_pattern_mismatch(self, slide: int) -> int:
+
+        for index, pat_char in reversed(list(enumerate(self.pattern))):
+            text_char = self.text[index + slide]
+            matched = pat_char == text_char
+            if not matched:
+                return index
+        else:
+            return -1
 
     def search(self) -> int:
-        current_index = len(self.pattern) - 1
-        slide_width = 0
-        while slide_width < (len(self.text) - len(self.pattern) + 1):
-            current_index = len(self.pattern) - 1
+        index_after_slide = 0
+        text_pat_diff = self._calculate_text_pattern_difference()
+        while index_after_slide < text_pat_diff:
+            pat_index = self._get_index_of_the_first_text_pattern_mismatch(
+                index_after_slide)
 
-            while current_index >= 0 and self.pattern[
-                    current_index] == self.text[slide_width + current_index]:
-                current_index -= 1
+            pattern_match_found = pat_index < 0
 
-            if current_index < 0:
-                return slide_width
+            if pattern_match_found:
+                return index_after_slide
             else:
-                slide_width += max(1, current_index - self.decide_slide_width(
-                    self.text[slide_width + current_index]))
+                index_after_slide += self.decide_slide_width(
+                    pat_index,
+                    self.text[index_after_slide + pat_index],
+                )
         return -1
